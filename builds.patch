@@ -1,0 +1,60 @@
+diff --git a/src/Helpers/Builds.php b/src/Helpers/Builds.php
+index f500f90..a0110ce 100644
+--- a/src/Helpers/Builds.php
++++ b/src/Helpers/Builds.php
+@@ -49,7 +49,7 @@
+             $this->postData = Flight::request()->data;
+ 
+             // Internal Initialization routines
+-    		$this->getBuilds();
++    		//$this->getBuilds();
+     	}
+ 
+       /**
+@@ -100,7 +100,7 @@
+       public function setPostData( $customData ){
+           $this->postData = $customData;
+           $this->builds = array();
+-          $this->getBuilds();
++          $this->getBuilds($customData);
+       }
+ 
+       /**
+@@ -136,7 +136,7 @@
+ 
+       /* Utility / Internal */
+ 
+-    	private function getBuilds() {
++    	private function getBuilds($customData) {
+             // Get physical paths of where the files resides
+             $path = Flight::cfg()->get('realBasePath') . '/builds/full';
+             // Get subdirs
+@@ -176,11 +176,12 @@
+                                 }
+                             } else
+                                 $build = new Build( $file, $dir, $this->logger);
++                           
++			    //exit(print_r($customData['params']));
++                            if ( $build->isValid( $customData['params'] ) ) {
++				   array_push( $this->builds , $build );
+ 
+-                            if ( $build->isValid( $this->postData['params'] ) ) {
+-                                array_push( $this->builds , $build );
+-
+-                                if (strcmp($this->postData['params']['source_incremental'], $build->getIncremental()) == 0) {
++                                if (strcmp($customData['params']['source_incremental'], $build->getIncremental()) == 0) {
+                                   $this->currentBuild = $build;
+                                   $this->logger->info($build->getIncremental().' is the current build');
+                                 }
+@@ -189,8 +190,8 @@
+                     }
+                 }
+             }
+-
+-            if (!empty($this->postData['params']['source_incremental']) && is_null($this->currentBuild))
+-              $this->currentBuild = $this->builds[1];
++	    if (!empty($customData['params']['source_incremental']) && is_null($this->currentBuild))
++		 //exit(print_r($this->builds));
++		 $this->currentBuild = $this->builds[0];
+     	}
+     }
